@@ -1,0 +1,2 @@
+# AndroidDevicesIdentifyAndAntiVirtualDevices
+搜集Android设备唯一标识码，并且区分出真实设备和虚拟设备
