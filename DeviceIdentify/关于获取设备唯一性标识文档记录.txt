@@ -1,0 +1,117 @@
+#  如何 抗虚拟设备？
+
+唯一的办法就是识别出模拟器
+那怎么识别一台设备是不是模拟器呢？
+
+https://stackoverflow.com/questions/1115413/android-emulator-vs-real-device
+
+
+android原生模拟器不支持带.so库的app
+但是夜神模拟器支持
+
+anti virtual devices
+#### 读取cpu信息
+https://blog.csdn.net/rd_w_csdn/article/details/53841018
+https://blog.csdn.net/mengweiqi33/article/details/22796619
+
+https://blog.csdn.net/easkshark/article/details/70739735
+
+####  具体识别方案
+https://blog.csdn.net/tianshuai4317618/article/details/78834683
+
+#### 读取设备的cpu架构
+http://allenfeng.com/2016/11/06/what-you-should-know-about-android-abi-and-so/
+shell@NX529J:/ $ getprop | grep abilist
+[ro.product.cpu.abi]: [arm64-v8a]
+[ro.product.cpu.abilist32]: [armeabi-v7a,armeabi]
+[ro.product.cpu.abilist64]: [arm64-v8a]
+[ro.product.cpu.abilist]: [arm64-v8a,armeabi-v7a,armeabi]
+
+使用API获取
+使用Build.SUPPORTED_ABIS可以获取当前设备支持的ABI列表：
+
+import android.os.Build;
+String supportedAbis = Build.SUPPORTED_ABIS;
+
+
+
+
+# 如何做到设备唯一性标识呢？
+
+
+
+
+## stack overflow
+
+https://stackoverflow.com/questions/2785485/is-there-a-unique-android-device-id
+
+
+### Do Android devices have a unique ID, and if so, what is a simple way to access it using Java?
+
+#### 方案1
+Settings.Secure#ANDROID_ID returns the Android ID as an unique for each user 64-bit hex string.
+
+import android.provider.Settings.Secure;
+private String android_id = Secure.getString(getContext().getContentResolver(),Secure.ANDROID_ID);
+
+问题：
+It's known to be null sometimes, it's documented as "can change upon factory reset".
+Use at your own risk, and it can be easily changed on a rooted phone. – Seva Alekseyev Jun 23 '10 at 14:21
+
+
+
+####  方案2
+final TelephonyManager tm = (TelephonyManager) getBaseContext().getSystemService(Context.TELEPHONY_SERVICE);
+
+final String tmDevice, tmSerial, androidId;
+tmDevice = "" + tm.getDeviceId();
+tmSerial = "" + tm.getSimSerialNumber();
+androidId = "" + android.provider.Settings.Secure.getString(getContentResolver(), android.provider.Settings.Secure.ANDROID_ID);
+
+UUID deviceUuid = new UUID(androidId.hashCode(), ((long)tmDevice.hashCode() << 32) | tmSerial.hashCode());
+String deviceId = deviceUuid.toString();
+
+<uses-permission android:name="android.permission.READ_PHONE_STATE" />
+
+
+# UUID
+通用唯一识别码（英语：Universally Unique Identifier，简称UUID）是一种软件建构的标准，
+亦为开放软件基金会组织在分布式计算环境领域的一部分。
+
+UUID Version 1：基于时间的UUID
+
+基于时间的UUID通过计算当前时间戳、随机数和机器MAC地址得到。
+由于在算法中使用了MAC地址，这个版本的UUID可以保证在全球范围的唯一性。
+但与此同时，使用MAC地址会带来安全性问题，这就是这个版本UUID受到批评的地方。
+如果应用只是在局域网中使用，也可以使用退化的算法，以IP地址来代替MAC地址－－Java的UUID往往是这样实现的（当然也考虑了获取MAC的难度）。
+
+
+UUID Version 3：基于名字的UUID（MD5）
+
+基于名字的UUID通过计算名字和名字空间的MD5散列值得到。
+这个版本的UUID保证了：相同名字空间中不同名字生成的UUID的唯一性；不同名字空间中的UUID的唯一性；
+相同名字空间中相同名字的UUID重复生成是相同的。
+
+
+UUID Version 4：随机UUID
+
+根据随机数，或者伪随机数生成UUID。这种UUID产生重复的概率是可以计算出来的，
+但随机的东西就像是买彩票：你指望它发财是不可能的，但狗屎运通常会在不经意中到来。
+
+
+UUID Version 5：基于名字的UUID（SHA1）
+
+和版本3的UUID算法类似，只是散列值计算使用SHA1（Secure Hash Algorithm 1）算法。
+
+
+UUID的应用
+
+从UUID的不同版本可以看出，Version 1/2适合应用于分布式计算环境下，具有高度的唯一性；
+Version 3/5适合于一定范围内名字唯一，且需要或可能会重复生成UUID的环境下；
+至于Version 4，我个人的建议是最好不用（虽然它是最简单最方便的）。
+
+
+
+通常我们建议使用UUID来标识对象或持久化数据，但以下情况最好不使用UUID：
+
+

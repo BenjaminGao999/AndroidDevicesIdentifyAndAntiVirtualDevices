@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="com.adnonstop.deviceidentify.MainActivity">
+
+    <Button
+        android:id="@+id/btn_obtain_device_identify"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="获取识别号" />
+
+</LinearLayout>
